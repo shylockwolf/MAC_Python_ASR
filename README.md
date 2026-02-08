@@ -1,113 +1,248 @@
-# 音频转文字工具
+# NVIDIA ASR GUI - 语音转文字工具
 
-基于PyQt6和OpenAI Whisper的语音转文字GUI应用，支持说话人识别。
+一个功能强大的语音转文字 GUI 应用程序，支持多种语音识别模型和语言。
 
 ## 功能特性
 
-- 支持MP3和M4A格式音频文件
-- 多种模型选择（Small/Medium/Large-v3）
-- Medium模型默认，准确度高
-- **说话人识别**（区分不同说话人）
-  - 说话人标记为 [说话人01]、[说话人02] 等
-  - 基于音频特征自动聚类
-  - 无需额外下载说话人模型
-- 实时进度显示和预估时间
-- 自动保存到音频文件同目录
-- 支持中断和恢复
-- 支持另存为其他位置
-- 简洁易用的图形界面
+- 🎤 **多种模型支持**：可选择 NVIDIA API 或本地 Whisper 模型
+- 🌍 **多语言支持**：支持中文、英文、日语、韩语、法语、德语、西班牙语、意大利语、葡萄牙语、俄语等
+- 🎯 **多种模型大小**：Whisper 模型支持 Tiny、Base、Small、Medium、Large 五种大小
+- 📝 **智能断句**：自动按标点符号分割句子，每句一行
+- 🔄 **自动格式转换**：支持多种音频格式，自动转换为 WAV 格式
+- 💾 **自动保存**：转录结果自动保存为 TXT 文件
+- 🔧 **调试信息**：提供详细的调试信息，方便排查问题
 
-## 安装依赖
+## 安装方法
+
+### 1. 克隆或下载项目
+
+```bash
+cd /Users/lanma/Downloads/Program/NVIDIA\ ASR
+```
+
+### 2. 安装依赖
 
 ```bash
 pip install -r requirements.txt
 ```
 
-首次运行会自动下载：
-- Whisper模型（~769MB for Medium）
-- 无需下载说话人模型（使用内置聚类算法）
+### 3. 配置环境变量（可选但推荐）
+
+```bash
+# 复制配置模板
+cp .env.example .env
+
+# 编辑 .env 文件，填入你的配置
+# 注意：.env 文件已添加到 .gitignore，不会被提交到版本控制
+```
+
+### 4. 安装 ffmpeg（可选，用于音频格式转换）
+
+```bash
+# macOS
+brew install ffmpeg
+
+# Linux
+sudo apt-get install ffmpeg
+
+# Windows
+# 从 https://ffmpeg.org/download.html 下载并安装
+```
 
 ## 使用方法
 
-1. 运行程序：
-   ```bash
-   python main.py
-   ```
+### 启动程序
 
-2. 点击"选择音频文件"选择音频文件
-
-3. 选择模型（默认Medium，准确度高）
-   - Small (~470MB, 较快, 中等准确度)
-   - Medium (~769MB, 较慢, 高准确度) - 推荐
-   - Large-v3 (~1550MB, 慢, 最高准确度)
-
-4. 选择是否识别说话人
-   - 勾选"识别说话人"可区分不同说话人
-   - 输出格式：`[说话人01] 文本内容`
-   - 不勾选则不区分说话人，输出纯文本
-
-5. 点击"开始转录"开始识别
-
-6. 转录过程中
-   - 进度条显示实时进度
-   - 状态显示剩余时间预估
-   - 可点击"停止转录"中断
-
-7. 转录完成后
-   - 自动在同目录下保存为同名的txt文件
-   - 例如：`audio.mp3` → `audio.txt`
-   - 可使用"另存为"按钮保存到其他位置
-
-## 技术说明
-
-- **语音识别**：使用OpenAI Whisper模型（支持Small/Medium/Large）
-- **说话人识别**：基于音频特征的无监督聚类算法
-  - 使用Agglomerative聚类
-  - 特征：时长、能量、过零率
-  - 自动确定说话人数量
-- Medium模型默认，准确度高（~769MB）
-- 支持中文语音识别
-- 首次运行会自动下载模型到 `~/.cache/whisper/`
-- CPU运行模式，无需GPU
-- 无需下载额外的说话人分离模型
-
-## 输出示例
-
-### 启用说话人识别
-```
-[说话人01] 你好，请介绍一下这个产品
-[说话人02] 这是我们最新推出的智能音箱
-[说话人01] 它有什么特点呢？
-[说话人02] 支持语音控制和智能家居联动
+```bash
+python3 asr_gui.py
 ```
 
-### 禁用说话人识别
+### 界面操作
+
+1. **选择语音文件**：点击"浏览"按钮选择音频文件
+2. **选择模型**：
+   - **NVIDIA API**：使用 NVIDIA 云端 API，需要网络连接
+   - **本地 Whisper**：使用本地 Whisper 模型，无需网络
+3. **选择模型大小**（仅本地 Whisper）：
+   - Tiny：最快，准确度较低
+   - Base：平衡速度和准确度（推荐）
+   - Small：准确度较高
+   - Medium：准确度高
+   - Large：最准确，速度较慢
+4. **选择语言**：支持自动检测或指定语言
+5. **点击"处理"**：开始语音转文字
+
+### 支持的音频格式
+
+- WAV
+- MP3
+- M4A
+- FLAC
+- OGG
+- OPUS
+
+## 模型对比
+
+| 特性 | NVIDIA API | 本地 Whisper |
+|------|-----------|-------------|
+| 速度 | 快 | 取决于模型大小 |
+| 准确性 | 高 | 高（Large 模型） |
+| 网络要求 | 需要网络 | 不需要网络 |
+| 隐私 | 数据上传到服务器 | 完全本地处理 |
+| 成本 | 可能产生 API 费用 | 免费 |
+| 首次使用 | 即时 | 需要下载模型 |
+
+## 配置说明
+
+### 环境变量配置（推荐）
+
+程序支持通过 `.env` 文件配置敏感信息，避免将密钥硬编码在代码中。
+
+#### 创建配置文件
+
+1. 复制配置模板：
+```bash
+cp .env.example .env
 ```
-你好，请介绍一下这个产品
-这是我们最新推出的智能音箱
-它有什么特点呢？
-支持语音控制和智能家居联动
+
+2. 编辑 `.env` 文件，填入你的配置：
+```bash
+# NVIDIA API 配置
+NVIDIA_API_KEY=your-nvidia-api-key-here
+NVIDIA_SERVER=grpc.nvcf.nvidia.com:443
+NVIDIA_FUNCTION_ID=your-function-id-here
+
+# Whisper 配置
+WHISPER_MODEL_SIZE=base
+WHISPER_CACHE_DIR=~/.cache/whisper
+
+# 音频配置
+AUDIO_SAMPLE_RATE=16000
+AUDIO_CHANNELS=1
+
+# 语言配置
+DEFAULT_LANGUAGE=multi
+
+# 其他配置
+ENABLE_DEBUG=false
+AUTO_SAVE_RESULTS=true
 ```
 
-## 系统要求
+#### 配置参数说明
 
-- Python 3.8+
-- 8GB RAM（推荐16GB+）
-- macOS / Windows / Linux
+| 参数 | 说明 | 默认值 |
+|------|------|---------|
+| NVIDIA_API_KEY | NVIDIA API 密钥 | - |
+| NVIDIA_SERVER | NVIDIA 服务器地址 | grpc.nvcf.nvidia.com:443 |
+| NVIDIA_FUNCTION_ID | NVIDIA 函数 ID | - |
+| WHISPER_MODEL_SIZE | Whisper 模型大小 | base |
+| WHISPER_CACHE_DIR | Whisper 模型缓存目录 | ~/.cache/whisper |
+| AUDIO_SAMPLE_RATE | 音频采样率 | 16000 |
+| AUDIO_CHANNELS | 音频通道数 | 1 |
+| DEFAULT_LANGUAGE | 默认语言 | multi |
+| ENABLE_DEBUG | 启用调试模式 | false |
+| AUTO_SAVE_RESULTS | 自动保存结果 | true |
 
-## 注意事项
+### NVIDIA API 配置
 
-1. **说话人识别准确性**：
-   - 在安静环境下效果最佳
-   - 说话人声音差异越大，识别越准确
-   - 背景噪音可能影响识别效果
+如果不想使用 `.env` 文件，也可以直接编辑 `asr_gui.py` 文件：
 
-2. **说话人编号**：
-   - 基于聚类结果自动编号
-   - 每次转录编号可能不同
-   - 通常识别为2-4个说话人
+```python
+self.api_key = "your-api-key"
+self.server = "grpc.nvcf.nvidia.com:443"
+self.function_id = "your-function-id"
+```
 
-3. **性能建议**：
-   - Medium模型在准确度和速度间平衡最好
-   - 长音频建议启用说话人识别
-   - 音频质量高时识别效果更佳
+### Whisper 模型缓存
+
+Whisper 模型首次使用时会自动下载并缓存到：
+- macOS: `~/.cache/whisper/`
+- Linux: `~/.cache/whisper/`
+- Windows: `C:\Users\<username>\.cache\whisper\`
+
+## 常见问题
+
+### 1. Whisper 模型下载失败
+
+**问题**：出现 SSL 证书验证错误
+
+**解决方案**：程序已自动处理 SSL 证书验证问题，无需手动干预。
+
+### 2. 音频格式不支持
+
+**问题**：提示文件格式不支持
+
+**解决方案**：确保已安装 ffmpeg，程序会自动转换不支持的格式。
+
+### 3. NVIDIA API 连接失败
+
+**问题**：无法连接到 NVIDIA 服务器
+
+**解决方案**：
+- 检查网络连接
+- 确认 API 密钥有效
+- 尝试使用本地 Whisper 模型
+
+### 4. 转录结果不准确
+
+**解决方案**：
+- 尝试更大的 Whisper 模型
+- 确保音频质量良好
+- 指定正确的语言而不是自动检测
+
+## 项目结构
+
+```
+NVIDIA ASR/
+├── asr_gui.py              # 主程序文件
+├── requirements.txt         # Python 依赖
+├── README.md              # 项目说明文档
+├── .env.example           # 环境变量配置模板
+├── .env                  # 环境变量配置文件（不提交到版本控制）
+├── .gitignore           # Git 忽略配置
+├── install.sh            # 自动安装脚本
+└── python-clients/        # NVIDIA Riva 客户端库
+    ├── riva/            # Riva 核心库
+    ├── scripts/         # 示例脚本
+    └── tests/          # 测试文件
+```
+
+## 技术栈
+
+- **GUI 框架**：Tkinter
+- **语音识别**：
+  - NVIDIA Riva API
+  - OpenAI Whisper
+- **音频处理**：PyAudio, ffmpeg
+- **网络通信**：gRPC
+- **配置管理**：python-dotenv
+
+## 许可证
+
+本项目遵循相关开源许可证。NVIDIA Riva 客户端库遵循其各自的许可证。
+
+## 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+## 更新日志
+
+### v1.2.0 (2025-02-08)
+- ✨ 新增 .env 环境变量配置支持
+- ✨ 新增配置文件模板 (.env.example)
+- 🔒 将敏感信息（API 密钥）移至 .env 文件
+- 📝 更新文档，添加详细配置说明
+- 🛡️ 更新 .gitignore，保护 .env 文件不被提交
+
+### v1.1.0 (2025-02-08)
+- ✨ 新增本地 Whisper 模型支持
+- ✨ 新增多种模型大小选择
+- ✨ 新增 SSL 证书验证自动处理
+- 🐛 修复模型加载错误
+- 🐛 修复音频格式转换问题
+
+### v1.0.0 (2025-02-08)
+- 🎉 初始版本发布
+- ✨ 支持 NVIDIA API 语音识别
+- ✨ 支持多语言转录
+- ✨ 支持多种音频格式
