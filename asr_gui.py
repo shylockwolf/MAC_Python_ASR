@@ -34,7 +34,7 @@ class ASRGUI:
         self.root.resizable(True, True)
         
         # API配置 - 从环境变量读取，如果没有则使用默认值
-        self.api_key = os.getenv('NVIDIA_API_KEY', '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')
+        self.api_key = os.getenv('NVIDIA_API_KEY')
         self.server = os.getenv('NVIDIA_SERVER', 'grpc.nvcf.nvidia.com:443')
         self.function_id = os.getenv('NVIDIA_FUNCTION_ID', 'b702f636-f60c-4a3d-a6f4-f3568c13bd7d')
         
